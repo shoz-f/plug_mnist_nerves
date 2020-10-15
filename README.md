@@ -1,32 +1,42 @@
 # PlugMnist
 
-**TODO: Add description**
+MNIST application implemented in Elixir with Tensorflow lite.
 
-## Targets
+## Platform
+- Windows MSYS2/MinGW64
+- Ubuntu on Windows Subsystem for Linux
 
-Nerves applications produce images for hardware targets based on the
-`MIX_TARGET` environment variable. If `MIX_TARGET` is unset, `mix` builds an
-image that runs on the host (e.g., your laptop). This is useful for executing
-logic tests, running utilities, and debugging. Other targets are represented by
-a short name like `rpi3` that maps to a Nerves system image for that platform.
-All of this logic is in the generated `mix.exs` and may be customized. For more
-information about targets see:
+## Requirement
 
-https://hexdocs.pm/nerves/targets.html#content
+Following items are needed to build 'plug_mnist'. To store them under "C:/msys64/home/work".
 
-## Getting Started
+standard packages:
+- nlohmann/json: JSON for Modern C++
+- libjpeg
 
-To start your Nerves app:
-  * `export MIX_TARGET=my_target` or prefix every command with
-    `MIX_TARGET=my_target`. For example, `MIX_TARGET=rpi3`
-  * Install dependencies with `mix deps.get`
-  * Create firmware with `mix firmware`
-  * Burn to an SD card with `mix firmware.burn`
+extra libraries:
+- CImg-2.9.2:     http://cimg.eu/download.shtml
+- tensorflow_src: https://github.com/tensorflow/tensorflow.git
 
-## Learn more
+Before building 'plug_mnist", you have to prepare 'libtensorflow-lite.a'.
+To see https://qiita.com/ShozF/items/50d45b6234fa11da1a0d more detail.
 
-  * Official docs: https://hexdocs.pm/nerves/getting-started.html
-  * Official website: https://nerves-project.org/
-  * Forum: https://elixirforum.com/c/nerves-forum
-  * Discussion Slack elixir-lang #nerves ([Invite](https://elixir-slackin.herokuapp.com/))
-  * Source: https://github.com/nerves-project/nerves
+## Getting start
+You can get the plug_mnist app to invoke following command:
+
+> mix deps<br>
+mix compile
+
+If your 'libtensorflow-lite.a' is stored to a different directory than the default,
+you need to specify the root directory in the environment variable "WORK_HOME":
+
+> set WORK_HOME=C:/msys64/home/other_root<br>
+mix compile
+
+After then, you run the app:
+
+> mix run --no-halt
+
+and connect your browser to "http://localhost:5000"
+
+Let's enjoy!
