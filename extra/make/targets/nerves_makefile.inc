@@ -2,9 +2,14 @@
 ifeq ($(TARGET),nerves)
   # Default to the architecture used on the Pi Two/Three (ArmV7), but override this
   # with TARGET_ARCH=armv6 to build for the Pi Zero or One.
-  TARGET_ARCH := armv6
+  # TARGET_ARCH := armv6
 
-  ifeq ($(TARGET_ARCH), armv6)
+  ifeq (, $(findstring "$(MIX_TARGET)","rpi" "rpi0" "rpi2" "rpi3"))
+    $(error "unknown target: $(MIX_TARGET)")
+  endif
+
+  ifeq ("$(MIX_TARGET)", $(findstring "$(MIX_TARGET)","rpi" "rpi0"))
+    TARGET_ARCH := armv6
     TARGET_TOOLCHAIN_PREFIX := armv6-rpi-linux-gnueabi-
     CXXFLAGS += \
       -march=armv6 \
@@ -27,7 +32,8 @@ ifeq ($(TARGET),nerves)
       -Wl,--as-needed
   endif
 
-  ifeq ($(TARGET_ARCH), armv7)
+  ifeq ("$(MIX_TARGET)", $(findstring "$(MIX_TARGET)","rpi2" "rpi3"))
+    TARGET_ARCH := armv7
     TARGET_TOOLCHAIN_PREFIX := arm-unknown-linux-gnueabihf-
     CXXFLAGS += \
       -march=armv7-a \

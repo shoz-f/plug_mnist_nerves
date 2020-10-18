@@ -15,10 +15,23 @@ ifeq ($(CROSSCOMPILE),)
         INC_EXT    = -I$(DEPS_HOME)/CImg-2.9.2
     endif
 else
-    DEPS_HOME ?= ./extra
-    TFL_GEN    = nerves_armv6
-    INC_EXT    = -I$(DEPS_HOME)/usr/include -I$(DEPS_HOME)/usr/include/arm-linux-gnueabi
-    LDFLAGS    = -L$(DEPS_HOME)/usr/lib/arm-linux-gnueabi -lpthread -ldl -latomic
+    ifeq (, $(findstring "$(MIX_TARGET)","rpi" "rpi0" "rpi2" "rpi3"))
+      $(error "unknown target: $(MIX_TARGET)")
+    endif
+
+    ifeq ("$(MIX_TARGET)", $(findstring "$(MIX_TARGET)","rpi" "rpi0"))
+      DEPS_HOME ?= ./extra
+      TFL_GEN    = nerves_armv6
+      INC_EXT    = -I$(DEPS_HOME)/usr/include -I$(DEPS_HOME)/usr/include/arm-linux-gnueabi
+      LIB_EXT    = -L$(DEPS_HOME)/usr/lib/arm-linux-gnueabi -lpthread -ldl -latomic
+    endif
+    ifeq ("$(MIX_TARGET)", $(findstring "$(MIX_TARGET)","rpi2" "rpi3"))
+      $(info "arm7")
+      DEPS_HOME ?= ./extra
+      TFL_GEN    = nerves_armv7
+      INC_EXT    = -I$(DEPS_HOME)/usr/include -I$(DEPS_HOME)/usr/include/arm-linux-gnueabihf
+      LIB_EXT    = -L$(DEPS_HOME)/usr/lib/arm-linux-gnueabihf -lpthread -ldl -latomic
+    endif
 endif
 
 INCLUDE   = -I./src \
@@ -27,29 +40,30 @@ INCLUDE   = -I./src \
             $(INC_EXT)
 DEFINES   = #-D__LITTLE_ENDIAN__ -DTFLITE_WITHOUT_XNNPACK
 CXXFLAGS += -O3 -DNDEBUG -fPIC --std=c++11 -fext-numeric-literals $(INCLUDE) $(DEFINES)
-LDFLAGS  += $(LIB_EXT) -ljpeg
+LDFLAGS  += $(LIB_EXT) -ljpeg 
 
 LIB_TFL = $(DEPS_HOME)/tensorflow_src/tensorflow/lite/tools/make/gen/$(TFL_GEN)/lib/libtensorflow-lite.a
 
+PREFIX = $(MIX_APP_PATH)/priv
+BUILD  = $(MIX_APP_PATH)/obj
+
 SRC=$(wildcard src/*.cc)
-OBJ=$(SRC:src/%.cc=obj/%.o)
+OBJ=$(SRC:src/%.cc=$(BUILD)/%.o)
 
+all: $(BUILD) $(PREFIX) install
 
+install: $(PREFIX)/tfl_interp
 
-all: obj priv install
-
-install: priv/tfl_interp
-
-obj/%.o: src/%.cc
+$(BUILD)/%.o: src/%.cc
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-priv/tfl_interp: $(OBJ)
+$(PREFIX)/tfl_interp: $(OBJ)
 	$(CXX) $^ $(LIB_TFL) $(LDFLAGS) -o $@
 
 clean:
-	rm -f priv/tfl_interp $(OBJ)
+	rm -f $(PREFIX)/tfl_interp $(OBJ)
 
-priv obj:
+$(PREFIX) $(BUILD):
 	mkdir -p $@
 
 print-vars:

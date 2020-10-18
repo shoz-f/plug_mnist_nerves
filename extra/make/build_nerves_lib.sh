@@ -17,7 +17,19 @@
 set -x
 set -e
 
-PATH=~/.nerves/artifacts/nerves_toolchain_armv6_rpi_linux_gnueabi-linux_x86_64-1.3.2/bin:$PATH
+case "${MIX_TARGET}" in
+    "rpi"|"rpi0")
+        PATH=~/.nerves/artifacts/nerves_toolchain_armv6_rpi_linux_gnueabi-linux_x86_64-1.3.2/bin:$PATH
+	;;
+
+    "rpi2"|"rpi3")
+        PATH=~/.nerves/artifacts/nerves_toolchain_arm_unknown_linux_gnueabihf-linux_x86_64-1.3.2/bin:$PATH
+	;;
+
+    *) echo "Unknown target: ${MIX_TARGET}"
+       exit 1
+       ;;
+esac
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TENSORFLOW_DIR="${SCRIPT_DIR}/../../../.."
